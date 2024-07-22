@@ -1,0 +1,37 @@
+[package]
+name = "zimmers"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-beta", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0-beta", features = [] }
+tauri-plugin-shell = "2.0.0-beta"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clipboard-win = "5.4.0"
+lazy_static = "1.5.0"
+tauri-plugin-dialog = "2.0.0-beta.11"
+tauri-plugin-fs = "2.0.0-beta.11"
+log = "0.4.22"
+
+[dependencies.windows]
+version = "0.58.0"
+features = [
+    "Win32_System_DataExchange",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Foundation",
+    "Win32_System_LibraryLoader",
+    "Win32_Graphics_Gdi",
+
+]
+
+[dependencies.pyo3]
+version = "0.22.1"
+features = ["auto-initialize", "gil-refs", "extension-module"]
