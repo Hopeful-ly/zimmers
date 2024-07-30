@@ -2,6 +2,7 @@
 
 use tauri::Manager;
 
+use handlers::anki::anki;
 use handlers::lemmatize::{initialize_spacy, lemmatize};
 
 mod clipboard;
@@ -15,7 +16,7 @@ fn main() {
             clipboard::run_clipboard_listener(app.app_handle().clone());
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![lemmatize, initialize_spacy])
+        .invoke_handler(tauri::generate_handler![lemmatize, initialize_spacy, anki])
         .plugin(tauri_plugin_shell::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

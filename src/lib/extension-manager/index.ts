@@ -104,14 +104,14 @@ export async function parseExtension(content: string) {
         err,
         ok,
         ResultAsync,
-        store:{
-            set:store.set,
-            get:store.get,
+        store: {
+            set: store.set,
+            get: store.get,
         },
-        settings:{
-            set:setSetting,
-            get:getSetting,
-            register:registerSetting
+        settings: {
+            set: setSetting,
+            get: getSetting,
+            register: registerSetting
         }
     }))();
     if (rawExtension.isErr()) return err(new Error("Failed to run extension"));
@@ -131,6 +131,21 @@ export async function parseExtension(content: string) {
 
 
     return ok(extension)
+}
+
+export async function uninstallExtension(extension: Extension) {
+    const metadata = extension.getMetadata();
+    const extensionType = metadata.extensionType;
+    const extensionMap = extensions[extensionType];
+    if (!extensionMap) return err(new Error("Unsupported extension type"));
+    extensionMap.delete(metadata.name);
+
+    const extensionDir = await join(await appDataDir(), "extensions");
+    const path = await join(extensionDir, `${metadata.name}.js`);
+    if (!(await exists(path))) return err(new Error("Extension does not exist"));
+    await remove(path);
+
+    return ok(undefined);
 }
 
 export async function promptAndInstallExtension() {

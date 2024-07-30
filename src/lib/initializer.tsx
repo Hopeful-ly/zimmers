@@ -2,17 +2,16 @@ import {ok, Result, ResultAsync} from "neverthrow";
 import {ReactNode, useEffect, useState} from "react";
 
 import {extensionInitialization} from "@/lib/extension-manager";
-import {settingsInitialization} from "@/lib/settings.ts";
 import {storeInitialization} from "@/lib/store.ts";
 import {invoke} from "@tauri-apps/api/core";
+import {lookupInitialization} from "@/lib/lookup.ts";
 
 
 export type Initialization = () => Promise<Result<any, Error>>
 export const initializations: Record<string, Initialization> = {
     'extension-loader': extensionInitialization,
-    'settings': settingsInitialization,
     'store': storeInitialization,
-    'lemma-initialization': async () =>
+    'lemmatizer': async () =>
         await ResultAsync.fromPromise(
             invoke(
                 "initialize_spacy",
@@ -20,7 +19,8 @@ export const initializations: Record<string, Initialization> = {
             ),
             (error) => new Error(`Failed to initialize spacy: ${error}`
             )
-        )
+        ),
+    'lookups': lookupInitialization
 
 }
 

@@ -1,5 +1,4 @@
-(function () {
-
+(function (): LookupProvider {
     settings.register("yandex-key", {
         title: "Yandex API Key",
         description: "API key for Yandex",
@@ -7,7 +6,7 @@
         type: "string",
         storeKey: "yandex-key",
     });
-    const genderToArticleMapping = {
+    const genderToArticleMapping: Record<string, string> = {
         m: "Der",
         f: "Die",
         n: "Das",
@@ -17,7 +16,7 @@
             name: "Yandex",
             description: "Lookup provider for Yandex",
             version: "0.1.0",
-            extensionType: "lookup-provider",
+            extensionType: "lookup-provider" as const,
         };
     };
 
@@ -38,7 +37,8 @@
                     lang: "de-en",
                     text: query,
                 },
-            })
+            }),
+            () => ''
         );
 
         if (res.isErr()) {
@@ -52,35 +52,35 @@
             return err(new Error("No results"));
         }
 
-        return ok(
-            <>
-                {data.def
-                    .map((def: any) => {
-                        if (!def.tr || def.tr.length === 0) return;
-                        const article = genderToArticleMapping[data.def[0].gen];
+        const results = [] as LookupResult[];
 
-                        const definitions = def.tr.map((tr: any) => tr.text as string);
+        data.def
+            .forEach((def: any) => {
+                if (!def.tr || def.tr.length === 0) return;
 
-                        const info = def.fl;
+                const article = genderToArticleMapping[data.def[0].gen];
+                const definitions = def.tr.map((tr: any) => tr.text as string);
+                const info = def.fl;
 
-                        return (
-                            <div key={def.text}>
-                                <h2>
-                                    {article || ""}
-                                    {def.text}
-                                </h2>
-                                <p>{info}</p>
-                                <ul>
-                                    {definitions.map((definition: string) => (
-                                        <li key={definition}>{definition}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        );
+                if (article)
+                    results.push({
+                        targetField: "article",
+                        value: article,
                     })
-                    .filter(Boolean)}
-            </>
-        );
+                if (info)
+                    results.push({
+                        targetField: "extra",
+                        value: info,
+                    })
+                for (const definition of definitions) {
+                    results.push({
+                        targetField: "definition",
+                        value: definition,
+                    });
+                }
+            })
+
+        return ok(results);
     };
 
     return {

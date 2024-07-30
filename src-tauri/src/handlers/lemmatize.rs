@@ -9,52 +9,51 @@ lazy_static! {
 
 #[tauri::command]
 pub fn initialize_spacy() -> Result<(), String> {
-    let result: Result<(), _> = Python::with_gil(move |py| {
-        println!("Initializing spacy");
-        let mut spacy_module_guard = SPACY_MODULE.lock().unwrap();
-        if spacy_module_guard.is_none() {
-            println!("Importing spacy module");
-            let module = PyModule::import_bound(py, "de_core_news_sm")
-                .map_err(|e| format!("Error while importing spacy module: {:?}", e))?;
-            *spacy_module_guard = Some(module.into());
-        }
-        println!("Spacy initialized");
-        Ok(())
-    });
-
-    if result.is_ok() {
-        return Ok(());
-    }
-    return result;
+    // let result: Result<(), _> = Python::with_gil(move |py| {
+    //     println!("Initializing spacy");
+    //     let mut spacy_module_guard = SPACY_MODULE.lock().unwrap();
+    //     if spacy_module_guard.is_none() {
+    //         println!("Importing spacy module");
+    //         let module = PyModule::import_bound(py, "de_dep_news_trf")
+    //             .map_err(|e| format!("Error while importing spacy module: {:?}", e))?;
+    //         *spacy_module_guard = Some(module.into());
+    //     }
+    //     println!("Spacy initialized");
+    //     Ok(())
+    // });
+    //
+    // if result.is_ok() {
+    //     return Ok(());
+    // }
+    // return result;
+    Ok(())
 }
 
 #[tauri::command]
 pub fn lemmatize(word: String) -> Result<String, String> {
     println!("Lemmatizing word: {}", word);
     let result: Result<String, _> = Python::with_gil(move |py| {
-        println!("Initializing spacy");
-        let mut spacy_module_guard = SPACY_MODULE.lock().unwrap();
-        if spacy_module_guard.is_none() {
-            println!("Importing spacy module");
-            let module = PyModule::import_bound(py, "de_core_news_sm")
-                .map_err(|e| format!("Error while importing spacy module: {:?}", e))?;
-            *spacy_module_guard = Some(module.into());
-        }
-        let spacy_module = spacy_module_guard.as_ref().unwrap();
-        println!("Spacy initialized");
+        // println!("Initializing spacy");
+        // let mut spacy_module_guard = SPACY_MODULE.lock().unwrap();
+        // if spacy_module_guard.is_none() {
+        //     println!("Importing spacy module");
+        //     let module = PyModule::import_bound(py, "de_dep_news_trf")
+        //         .map_err(|e| format!("Error while importing spacy module: {:?}", e))?;
+        //     *spacy_module_guard = Some(module.into());
+        // }
+        // let spacy_module = spacy_module_guard.as_ref().unwrap();
+        // println!("Spacy initialized");
 
         println!("Loading lemmatizer module");
         let lemmatizer_module_result = PyModule::from_code_bound(
             py,
-            "def lemmatize(spacy,word):
-    nlp = spacy.load()
-    doc = nlp(word)
-    lemmas = []
-    for token in doc:
-        lemmas.append(token.lemma_)
-    if len(lemmas) == 0:
+            "\
+import simplemma
+def lemmatize(word, language, greedy=True):
+    try:
+        return simplemma.lemmatize(word, lang=language, greedy=greedy)
+    except Exception:
         return word
-    return lemmas[0]
         ",
             "",
             "",
@@ -84,7 +83,7 @@ pub fn lemmatize(word: String) -> Result<String, String> {
         println!("Lemmatize function retrieved");
 
         println!("Calling lemmatize function");
-        let lemma_obj_result = lemmatizer.call1(py, (spacy_module, word));
+        let lemma_obj_result = lemmatizer.call1(py, (word, "de"));
         if lemma_obj_result.is_err() {
             println!(
                 "Error while calling lemmatize function: {:?}",

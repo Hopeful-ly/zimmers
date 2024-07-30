@@ -1,23 +1,36 @@
-import spacy
+import re
+import simplemma
+import unicodedata
 
-nlp = spacy.load("de_dep_news_trf")
+simplemma_languages = ['de']
 
 
-def lemmatize(word):
-    doc = nlp(word)
+def lem_pre(word, language):
+    _ = language
+    word = re.sub(r'[\?\.!«»”“"…,()\[\]]*', '', word).strip()
+    word = re.sub(r'<.*?>', '', word)
+    word = re.sub(r'\{.*?\}', "", word)
+    return word
 
-    lemmas = []
-    for token in doc:
-        lemmas.append(token.lemma_)
 
-    if len(lemmas) == 0:
+def lem_word(word, language, greedy=False):
+    return lemmatize(lem_pre(word, language), language, greedy)
+
+
+def lemmatize(word, language, greedy=True):
+    try:
+        if not word:
+            return word
+        if language in simplemma_languages:
+            return simplemma.lemmatize(word, lang=language, greedy=greedy)
+        else:
+            return word
+    except Exception as e:
+        print(e)
         return word
 
-    return lemmas[0]
+
+print(lem_word( "möchte", "de"))
 
 
-try:
-    while a := input():
-        print(lemmatize(a))
-except KeyboardInterrupt:
-    pass
+

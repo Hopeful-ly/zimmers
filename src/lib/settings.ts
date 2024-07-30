@@ -1,49 +1,10 @@
-import {BaseDirectory, create, exists, readTextFile, remove, writeTextFile} from "@tauri-apps/plugin-fs";
-import {err, ok, Result, ResultAsync} from "neverthrow";
-import {confirm, message} from "@tauri-apps/plugin-dialog";
+import {ok} from "neverthrow";
 import {createStore} from "zustand";
 import {atomWithStore} from "jotai-zustand";
 import {produce} from "immer";
 import _ from "lodash";
 import * as store from "./store"
 import {useAtomValue} from "jotai";
-
-
-export const settingsInitialization = async () => {
-    if (!(await exists("settings.json", {baseDir: BaseDirectory.AppData}))) {
-        await create("settings.json", {baseDir: BaseDirectory.AppData});
-        await writeTextFile("settings.json", JSON.stringify({}), {baseDir: BaseDirectory.AppData});
-        return ok(true);
-    }
-
-    const file = await ResultAsync.fromPromise(readTextFile("settings.json", {baseDir: BaseDirectory.AppData}),
-        (err) => new Error(`Failed to read settings file: ${err}`)
-    );
-
-    if (file.isErr()) {
-        await message(file.error.message,
-            {title: "Error reading settings file"});
-        return err(new Error("Failed to read settings file"));
-    }
-
-    const settings = Result.fromThrowable(() => JSON.parse(file.value))();
-    if (settings.isErr()) {
-        const confirmation = await confirm(`Failed to parse settings file. This could be due the settings being invalid: ${file.value}`,
-            {
-                title: "Error reading settings file",
-                kind: "error",
-                cancelLabel: "Ignore (not recommended)",
-                okLabel: "Reset settings"
-            });
-        if (!confirmation) {
-            return err(new Error("Failed to parse settings file"));
-        }
-        await remove("settings.json", {baseDir: BaseDirectory.AppData});
-    }
-
-    return ok(true);
-}
-
 
 export interface NestedSettingEntry {
     [key: string]: SettingEntry | NestedSettingEntry;
@@ -54,6 +15,12 @@ export type SettingEntryType = NestedSettingEntry | SettingEntry;
 export const settingEntriesStore = createStore<NestedSettingEntry>(() => ({}))
 
 export const settingEntriesAtom = atomWithStore(settingEntriesStore);
+
+
+export const settingsInitialization = async () => {
+    return ok(true);
+}
+
 
 export class SettingEntry {
     constructor(

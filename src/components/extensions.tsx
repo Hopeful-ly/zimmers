@@ -1,15 +1,18 @@
-
-
 import useExtensions from "@/lib/extension-manager/use-extensions"
 import {Button} from "@/components/ui/button.tsx";
-import {promptAndInstallExtension} from "@/lib/extension-manager";
+import {promptAndInstallExtension, uninstallExtension} from "@/lib/extension-manager";
 import {message} from "@tauri-apps/plugin-dialog";
+import {TrashIcon} from "lucide-react";
+import {useState} from "react";
+
 export default function Extensions() {
-    const {extensions} =  useExtensions()
+    const [counter, setCounter] = useState(0)
+    const {extensions} = useExtensions()
     return (
         <div
             className="p-4"
         >
+            <div className="hidden">{counter}</div>
             <h1
                 className="text-2xl font-bold flex justify-between items-center"
             >Extensions
@@ -22,6 +25,7 @@ export default function Extensions() {
                             await message(res.error.message)
                             return
                         }
+                        setCounter(c => c + 1)
                         await message("Extension installed")
                     }}
 
@@ -29,8 +33,6 @@ export default function Extensions() {
                     Import
                 </Button>
             </h1>
-
-
 
 
             <div
@@ -48,10 +50,20 @@ export default function Extensions() {
                         >
                             {Array.from(extensions.values()).map((extension) => (
                                 <div
-                                    className="p-2 border border-gray-200 rounded m-2"
+                                    className="p-2 border border-gray-200 rounded m-2 flex justify-between items-center gap-4"
                                     key={extension.getMetadata().name}>
                                     {extension.getMetadata().name} - {extension.getMetadata().version}
+                                    <TrashIcon
+                                        className="cursor-pointer"
+                                        size={17}
+                                        onClick={async () => {
+                                            await uninstallExtension(extension)
+                                            setCounter(c => c + 1)
+                                        }
+                                        }
+                                    />
                                 </div>
+
                             ))}
                         </div>
                     </div>
