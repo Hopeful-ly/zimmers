@@ -65,6 +65,12 @@ to be completely made.
 
 ## Development
 
+### Pre-requisites
+
+- Install [Rust](https://www.rust-lang.org/)
+- Install [Node.js](https://nodejs.org/en)
+- Install [Python](https://www.python.org/), then install [`simplemma`](https://github.com/adbar/simplemma) by running `pip install simplemma`
+
 ### Run
 
 You can get the app up and running by cloning this repsository and going into it.
@@ -89,6 +95,26 @@ bun tauri dev
 ```
 
 A window should open after the vite runs and the rust files compile.
+
+### Bundle the extensions
+
+To build the currently available extensions, `cd` into the extensions folder:
+```
+cd extensions
+```
+and run the `build.ts` file using [Bun](https://bun.sh/)
+```
+bun run build.ts
+```
+The bundled extensions should show up as single `.js` files in the `/extensions/target` repository, so go in it
+```
+cd target
+```
+and 
+```
+ls
+```
+They should be there.
 
 
 
